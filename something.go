@@ -13,7 +13,7 @@ var modes = {
     "1: Basic Arithmetics",
     "2: Comparisons",
     "3: Fractions, Decimals, and Percentages",
-    "4: Trigonometry"
+    "4: Trigonometry",
 }
 
 func main() {
