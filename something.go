@@ -9,7 +9,7 @@ import (
     "github.com/urfave/cli/v2"
 )
 
-var modes = {
+var modes = []string{
     "1: Basic Arithmetics",
     "2: Comparisons",
     "3: Fractions, Decimals, and Percentages",
