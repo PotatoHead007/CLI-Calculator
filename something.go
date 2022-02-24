@@ -4,9 +4,11 @@ import (
     "fmt"
     "log"
     "os"
-    "regexp"
+    "bufio"
+    "strings"
 
     "github.com/urfave/cli/v2"
+    regexp "github.com/dlclark/regexp2"
 )
 
 var modes = []string{
@@ -28,28 +30,35 @@ func main() {
             }
 
             var chosenMode int8
-            var _, err = fmt.Scan(&chosenMode)
+            var _, err = fmt.Scanln(&chosenMode)
             if err != nil {
-                fmt.Println("Failiure to read from user input. Input may be of incorrect type.")
-                return
+                log.Println("Failiure to read from user input. Input may be of incorrect type.")
+                return err
             }
             switch chosenMode {
             case 1:
+                var reader = bufio.NewReader(os.Stdin)
                 fmt.Println("Basic Arithmetics selected.")
-                arithProcess()
+                fmt.Println("What equation do you want to solve?")
+                var input string
+                input, err := reader.ReadString('\n')
+                if err != nil {
+                    return err
+                }
+                arithProcess(nil, []string{strings.TrimSpace(input)})
             case 2:
                 fmt.Println("Comparisons selected.")
-                compProcess()
+                compProcess(c.Args())
             case 3: 
                 fmt.Println("Fractions, Decimals, & Percentages selected.")
-                fdpProcess()
+                fdpProcess(c.Args())
             case 4:
                 fmt.Println("Trigonometry selected")
-                trigProcess()
+                trigProcess(c.Args())
             default:
-                fmt.Printf("%v is not a valid choice of mode currently.")
-                return
+                log.Fatalf("%v is not a valid choice of mode currently.\n", chosenMode)
             }
+            return nil
         },
         Commands: []*cli.Command{
 			{
@@ -57,7 +66,7 @@ func main() {
 				Aliases: []string{"a", "1"},
 				Usage:   "Quickly compute arithmic problems without using the interactive mode.",
 				Action: func(c *cli.Context) error {
-					arithProcess(c.Args())
+					arithProcess(c.Args(), nil)
 					return nil
 				},
 			},
@@ -90,26 +99,51 @@ func main() {
 			},
 		},
     }
+
+    var err = app.Run(os.Args)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 
-func arithProcess(args cli.Args) {
-    arithRegexVerify = regexp.MustCompile(`(?<!.)\d+ ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+(?: ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+)*(?!.)`)
-    var matches = arithRegexVerify.FindString(args[0])
+func arithProcess(quickArgs cli.Args, interactiveArgs []string) {
+    var input string
+    if quickArgs == nil && interactiveArgs == nil {
+        log.Fatalln("Internal error in arithmetic module: both quickArgs and interactiveArgs were nil.")
+    } else if quickArgs != nil && interactiveArgs != nil {
+        log.Fatalln("Internal error in arithmetic module: both quickArgs and interactiveArgs were NOT nil.")
+    } else if quickArgs == nil {
+        input = interactiveArgs[0]
+    } else {
+        input = quickArgs.Get(0)
+    }
+    fmt.Println(input)
+    
+    fmt.Println("numbers beep boop")
+    var arithRegexVerify = regexp.MustCompile(`(?<!.)\d+ ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+(?: ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+)*(?!.)`, 0)
+    var isMatch, err = arithRegexVerify.MatchString(input)
+    if err != nil {
+        log.Fatal(err)
+    }
     
     fmt.Println("something")
-    for idx, match := range matches {
-        fmt.Printf("%v == %s\n", idx, match)
+    /*log.Println(isMatch)
+    log.Println(interactiveArgs[0])*/
+    if isMatch {
+        fmt.Println(input)
+    } else {
+        log.Fatalln("Invalid input in arithmetic module: input did not match defined regexp.")
     }
 }
 
 func compProcess(args cli.Args) {
-
+    fmt.Println("comparing beep boop")
 } 
 
 func fdpProcess(args cli.Args) {
-
+    fmt.Println("fractions beep boop")
 }
 
 func trigProcess(args cli.Args) {
-
+    fmt.Println("triangles beep boop")
 }
