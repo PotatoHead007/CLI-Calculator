@@ -120,20 +120,25 @@ func arithProcess(quickArgs cli.Args, interactiveArgs []string) {
     fmt.Println(input)
     
     fmt.Println("numbers beep boop")
-    var arithRegexVerify = regexp.MustCompile(`(?<!.)\d+ ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+(?: ?(?:(?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?\d+)*(?!.)`, 0)
-    var isMatch, err = arithRegexVerify.MatchString(input)
+    var arithRegexVerify = regexp.MustCompile(`(?<!.|\n)(\d+) ?((?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?(\d+)(?: ?((?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?(\d+))*(?!.|\n)`, 0)
+    var match, err = arithRegexVerify.FindStringMatch(input)
+    if match == nil {
+        log.Fatalln("Invalid input in arithmetic module: input did not match defined regexp.")
+    }
+    var matchGroupCaptues = match.Groups()
     if err != nil {
         log.Fatal(err)
+    }
+    for _, group := range matchGroupCaptues {
+        for _, capture := range group.Captures {
+            fmt.Printf("%v is '%s'\n", capture.Index, capture.String())
+        }
     }
     
     fmt.Println("something")
     /*log.Println(isMatch)
     log.Println(interactiveArgs[0])*/
-    if isMatch {
-        fmt.Println(input)
-    } else {
-        log.Fatalln("Invalid input in arithmetic module: input did not match defined regexp.")
-    }
+    fmt.Println(input)
 }
 
 func compProcess(args cli.Args) {
