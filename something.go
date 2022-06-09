@@ -28,6 +28,18 @@ func printfDebug(format string, v ...interface{}) {
     }
 }
 
+func isNumeral(input string) bool {
+    var pattern = regexp.MustCompile(`(?<!.|\n)-?\d+(?:.\d+)?(?!.|\n)`, 0)
+    var isMatch, err = pattern.MatchString(input)
+    if err != nil {
+        log.Fataln(err)
+    }
+    if isMatch {
+        return true
+    }
+    return false
+}
+
 var modes = []string{
     "\033[1;34m1:\033[0m Basic Arithmetics",
     "\033[1;34m2:\033[0m Comparisons",
@@ -153,6 +165,10 @@ func arithProcess(quickArgs cli.Args, interactiveArgs []string) {
     } else {
         input = quickArgs.Get(0)
     }
+
+    if strings.TrimSpace(input) == "" {
+        log.Fatalln("No input was provided. Please enter a valid input.")
+    }
     printDebug(input)
     
     var arithRegexVerify = regexp.MustCompile(`(?<!.|\n)(\(*)*(-?\d+)(\)*)* ?((?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?(\(*)*(-?\d+)(\)*)*(?: ?((?:[\+\-]|(?:[\*][\*]?))|(?:[\/][\/]?)) ?(\(*)*(-?\d+)(\)*)*)*(?!.|\n)`, 0)
@@ -180,16 +196,16 @@ func arithProcess(quickArgs cli.Args, interactiveArgs []string) {
         }
     }
     printDebug("\n")
-    for _, capt := range validCaptures {
-        printfDebug("%s : %v : %v\n", capt.String(), capt.Index, capt.Length)
+    for idx, capt := range validCaptures {
+        printfDebug("%s : %v : %v [%v]\n", capt.String(), capt.Index, capt.Length, idx)
     }
     sort.Sort(captureSort(validCaptures))
     printDebug("\n")
-    for _, capt := range validCaptures {
-        printfDebug("%s : %v : %v\n", capt.String(), capt.Index, capt.Length)
+    for idx, capt := range validCaptures {
+        printfDebug("%s : %v : %v [%v]\n", capt.String(), capt.Index, capt.Length, idx)
     }
-    
-    printDebug(input)
+
+    for idx, object
 }
 
 func compProcess(args cli.Args) {
